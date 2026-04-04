@@ -144,6 +144,23 @@ resource "aws_security_group" "eks_nodes_sg" {
   # kube-proxy on that node intercepts it, translates to the ClusterIP
   # ClusterIP routes to a healthy pod on port 3000 or 8080
   ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = [aws_vpc.main.cidr_block]
+    description = "Control plane to node (webhooks)"
+  }
+
+  ingress {
+    # any communication from the control plane - since kube api server talks to kubelt using this port
+    from_port   = 10250
+    to_port     = 10250
+    protocol    = "tcp"
+    cidr_blocks = [aws_vpc.main.cidr_block]
+    description = "Control plane to kubelet (logs, exec, probes)"
+  }
+
+  ingress {
     from_port   = 30000
     to_port     = 32767
     protocol    = "tcp"
