@@ -29,5 +29,10 @@ jobs:
       - name: Initialize Terraform
         run: terraform init
 
+      - name: Delete Node Group First
+        run: |
+          aws eks delete-nodegroup --cluster-name eks-non-prod --nodegroup-name eks-non-prod-node-group --region us-east-1 || true
+          aws eks wait nodegroup-deleted --cluster-name eks-non-prod --nodegroup-name eks-non-prod-node-group --region us-east-1 || true
+
       - name: Terraform Destroy
         run: terraform destroy -var-file="terraform.tfvars" -auto-approve
