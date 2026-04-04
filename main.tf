@@ -306,7 +306,6 @@ resource "aws_eks_cluster" "main" {
     # waits untilll the other associated roles are created
     aws_iam_role_policy_attachment.eks_cluster_policy,
     aws_iam_role_policy_attachment.eks_vpc_resource_controller,
-    aws_eks_node_group.main,
   ]
 
   tags = merge(local.common_tags, { Name = var.eks_cluster_name })
