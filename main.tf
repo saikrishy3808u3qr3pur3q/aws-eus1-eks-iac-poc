@@ -152,6 +152,7 @@ resource "aws_security_group" "eks_nodes_sg" {
   }
 
   ingress {
+    # any communication from the control plane - since kube api server talks to kubelt using this port
     from_port   = 10250
     to_port     = 10250
     protocol    = "tcp"
