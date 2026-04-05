@@ -321,7 +321,7 @@ resource "aws_eks_node_group" "main" {
 
   # instance type, AMI Image, Disk size
   instance_types = var.eks_node_instance_types
-  ami_type       = "AL2_x86_64"
+  ami_type       = "AL2023_x86_64_STANDARD"
   disk_size      = 20
 
   # Scaling configurations
