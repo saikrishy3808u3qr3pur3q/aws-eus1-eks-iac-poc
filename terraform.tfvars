@@ -49,3 +49,6 @@ eks_node_instance_types = ["t3.medium"]
 eks_node_desired_size   = 1
 eks_node_min_size       = 1
 eks_node_max_size       = 1
+
+# EKS OIDC
+eks_oidc_id = "A177C0EE34A06178CE92F7F067E864BA"

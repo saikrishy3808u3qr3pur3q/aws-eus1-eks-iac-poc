@@ -412,3 +412,32 @@ resource "aws_eks_access_policy_association" "lens_user_admin" {
   #}
 
 }
+
+# # --- IRSA: ArgoCD Image Updater ECR Access ---
+# resource "aws_iam_role" "argocd_image_updater_role" {
+#   name = "${var.project}-${var.environment}-argocd-image-updater-role"
+
+#   assume_role_policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [{
+#       Effect = "Allow"
+#       Principal = {
+#         Federated = "arn:aws:iam::762131618860:oidc-provider/oidc.eks.${var.aws_region}.amazonaws.com/id/${var.eks_oidc_id}"
+#       }
+#       Action = "sts:AssumeRoleWithWebIdentity"
+#       Condition = {
+#         StringEquals = {
+#           "oidc.eks.${var.aws_region}.amazonaws.com/id/${var.eks_oidc_id}:sub" = "system:serviceaccount:argocd:argocd-image-updater"
+#           "oidc.eks.${var.aws_region}.amazonaws.com/id/${var.eks_oidc_id}:aud" = "sts.amazonaws.com"
+#         }
+#       }
+#     }]
+#   })
+
+#   tags = local.common_tags
+# }
+
+# resource "aws_iam_role_policy_attachment" "argocd_image_updater_ecr" {
+#   role       = aws_iam_role.argocd_image_updater_role.name
+#   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+# }

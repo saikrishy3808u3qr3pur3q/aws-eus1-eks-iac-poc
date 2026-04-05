@@ -157,3 +157,8 @@ variable "eks_node_max_size" {
   type        = number
   default     = 3
 }
+
+variable "eks_oidc_id" {
+  description = "OIDC provider ID for the EKS cluster"
+  type        = string
+}
