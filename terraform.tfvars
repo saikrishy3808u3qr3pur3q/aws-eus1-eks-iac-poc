@@ -40,7 +40,7 @@ eks_nodes_sg_name_tag = "eks-non-prod-nodes-sg"
 backend_repo_non_prod_fe_name = "eks-non-prod-frontend"
 
 # Secrets Manager
-secretsmanager_non_prod_name = "eks-non-prod/app-secrets-new"
+secretsmanager_non_prod_name = "eks-non-prod/app-secrets-eus1"
 
 # EKS Cluster
 eks_cluster_name        = "eks-non-prod"
