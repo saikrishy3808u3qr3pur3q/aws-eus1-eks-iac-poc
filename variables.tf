@@ -111,8 +111,8 @@ variable "eks_nodes_sg_name_tag" {
 }
 
 # ECR
-variable "backend_repo_non_prod_fe_name" {
-  description = "Name of the ECR repository"
+variable "backend_repo_non_prod_be_name" {
+  description = "Name of the ECR-be repository"
   type        = string
 }
 

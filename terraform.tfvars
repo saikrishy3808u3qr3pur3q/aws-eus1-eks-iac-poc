@@ -37,7 +37,7 @@ private_eks_route_table_name_tag  = "eks-non-prod-private-rt"
 eks_nodes_sg_name_tag = "eks-non-prod-nodes-sg"
 
 # ECR
-backend_repo_non_prod_fe_name = "eks-non-prod-frontend"
+backend_repo_non_prod_be_name = "eks-non-prod-backend"
 
 # Secrets Manager
 secretsmanager_non_prod_name = "eks-non-prod/app-secrets-eus1"

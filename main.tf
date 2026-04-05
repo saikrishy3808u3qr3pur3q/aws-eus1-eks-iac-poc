@@ -180,14 +180,14 @@ resource "aws_security_group" "eks_nodes_sg" {
 
 # --- ECR Repository ---
 resource "aws_ecr_repository" "backend_non_prod_fe_repo" {
-  name                 = var.backend_repo_non_prod_fe_name
+  name                 = var.backend_repo_non_prod_be_name
   image_tag_mutability = "MUTABLE"
 
   image_scanning_configuration {
     scan_on_push = true
   }
 
-  tags = merge(local.common_tags, { Name = var.backend_repo_non_prod_fe_name })
+  tags = merge(local.common_tags, { Name = var.backend_repo_non_prod_be_name })
 }
 
 resource "aws_ecr_lifecycle_policy" "frontend_non_prod_repo_policy" {
