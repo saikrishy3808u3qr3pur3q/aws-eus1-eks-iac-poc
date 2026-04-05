@@ -302,6 +302,12 @@ resource "aws_eks_cluster" "main" {
     endpoint_public_access  = true
   }
 
+  access_config {
+    # Allows both EKS API and aws-auth ConfigMap to authenticate IAM principals
+    authentication_mode                         = "API_AND_CONFIG_MAP"
+    bootstrap_cluster_creator_admin_permissions = true
+  }
+
   depends_on = [
     # waits untilll the other associated roles are created
     aws_iam_role_policy_attachment.eks_cluster_policy,
@@ -343,4 +349,66 @@ resource "aws_eks_node_group" "main" {
   ]
 
   tags = merge(local.common_tags, { Name = "${var.eks_cluster_name}-node-group" })
+}
+
+# --- Lens EKS User ---
+resource "aws_iam_user" "lens_user" {
+  # create an iam user - with lens-eks-user-name
+  name = "lens-eks-user"
+  tags = local.common_tags
+}
+
+resource "aws_iam_policy" "lens_eks_policy" {
+  # eks full access - policy
+  name = "lens-eks-access-policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = "eks:*"
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_user_policy_attachment" "lens_user_policy" {
+  # user and policy attached
+  user       = aws_iam_user.lens_user.name
+  policy_arn = aws_iam_policy.lens_eks_policy.arn
+}
+
+# just like an console - first add access entry - then provide the access policy - associate
+
+# --- EKS Access Entry for Lens User ---
+resource "aws_eks_access_entry" "lens_user" {
+  cluster_name  = aws_eks_cluster.main.name
+  principal_arn = aws_iam_user.lens_user.arn
+  type          = "STANDARD"
+  # STANDARD     - for IAM users and CI/CD roles needing kubectl access
+  # EC2_LINUX    - for EC2 Linux node IAM roles (auto-created by EKS in API mode) - now config map handles it.
+  # EC2_WINDOWS  - for EC2 Windows node IAM roles
+  # FARGATE_LINUX - for Fargate execution roles
+  # always use standard for users and CI/CD roles
+
+  tags = local.common_tags
+}
+
+resource "aws_eks_access_policy_association" "lens_user_admin" {
+  cluster_name  = aws_eks_cluster.main.name
+  principal_arn = aws_iam_user.lens_user.arn
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+  # unrestricted access to everything - even cluster resoures
+
+  access_scope {
+    type = "cluster" // namespace
+  }
+  # access to everything - can have other option - namespace
+  # access_scope {
+  #type       = "namespace"
+  #namespaces = ["argocd", "my-app"]
+  #}
+
 }
