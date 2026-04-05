@@ -317,6 +317,24 @@ resource "aws_eks_cluster" "main" {
   tags = merge(local.common_tags, { Name = var.eks_cluster_name })
 }
 
+# --- EKS Node Launch Template ---
+# non-prod only - IMDSv2 optional allows pods to reach IMDS using node role credentials
+# for prod - use IRSA instead
+# why is it required - 
+# Since the pods requires AWS credentials for the 
+# This was a good catch - since all pods ran within the kubernetes 
+# We faced an issue - (it runs on a virtual ethernet) - meaning a seperate network right - the default hop limit for IMDS v2 is 1 - so as pods is in a different network technically to go from it to the node - hence -1 ttl which make it 0 and request is not probagated
+resource "aws_launch_template" "eks_nodes" {
+  name = "${var.eks_cluster_name}-node-lt"
+  metadata_options {
+    http_endpoint               = "enabled" # can access ec2 metadata
+    http_tokens                 = "optional" # request to the ec2 can go without the session token (boto 3 does it auto)
+    http_put_response_hop_limit = 2 
+  } 
+
+  tags = local.common_tags
+}
+
 # --- EKS Managed Node Group ---
 resource "aws_eks_node_group" "main" {
   # attach to cluster, name the node group, node role, subnets with availabilty
@@ -328,7 +346,11 @@ resource "aws_eks_node_group" "main" {
   # instance type, AMI Image, Disk size
   instance_types = var.eks_node_instance_types
   ami_type       = "AL2023_x86_64_STANDARD"
-  disk_size      = 20
+
+  launch_template {
+    name    = aws_launch_template.eks_nodes.name
+    version = aws_launch_template.eks_nodes.latest_version
+  }
 
   # Scaling configurations
   scaling_config {
@@ -413,31 +435,3 @@ resource "aws_eks_access_policy_association" "lens_user_admin" {
 
 }
 
-# # --- IRSA: ArgoCD Image Updater ECR Access ---
-# resource "aws_iam_role" "argocd_image_updater_role" {
-#   name = "${var.project}-${var.environment}-argocd-image-updater-role"
-
-#   assume_role_policy = jsonencode({
-#     Version = "2012-10-17"
-#     Statement = [{
-#       Effect = "Allow"
-#       Principal = {
-#         Federated = "arn:aws:iam::762131618860:oidc-provider/oidc.eks.${var.aws_region}.amazonaws.com/id/${var.eks_oidc_id}"
-#       }
-#       Action = "sts:AssumeRoleWithWebIdentity"
-#       Condition = {
-#         StringEquals = {
-#           "oidc.eks.${var.aws_region}.amazonaws.com/id/${var.eks_oidc_id}:sub" = "system:serviceaccount:argocd:argocd-image-updater"
-#           "oidc.eks.${var.aws_region}.amazonaws.com/id/${var.eks_oidc_id}:aud" = "sts.amazonaws.com"
-#         }
-#       }
-#     }]
-#   })
-
-#   tags = local.common_tags
-# }
-
-# resource "aws_iam_role_policy_attachment" "argocd_image_updater_ecr" {
-#   role       = aws_iam_role.argocd_image_updater_role.name
-#   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-# }

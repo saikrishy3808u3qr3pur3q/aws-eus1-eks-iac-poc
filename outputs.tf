@@ -96,3 +96,9 @@ output "eks_node_group_role_arn" {
   description = "IAM role ARN for EKS node group"
   value       = aws_iam_role.eks_node_role.arn
 }
+
+# # AWS Load Balancer Controller
+# output "aws_lbc_role_arn" {
+#   description = "IAM role ARN for AWS Load Balancer Controller"
+#   value       = aws_iam_role.aws_lbc_role.arn
+# }
